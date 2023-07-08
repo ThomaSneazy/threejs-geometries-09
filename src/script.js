@@ -1,10 +1,5 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
-import { VerticalBlurShader } from 'three/examples/jsm/shaders/VerticalBlurShader.js'
-import { HorizontalBlurShader } from 'three/examples/jsm/shaders/HorizontalBlurShader.js'
 
 /**
  * Base
@@ -14,17 +9,24 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
+scene.background = null // Pas de couleur de fond
 
 // Object
-const geometry = new THREE.BoxGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({
-  color: 'black', // Couleur noire
-  opacity: 0.5, // Opacité à 50%
-  transparent: true,
-  wireframe: false
+const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5)
+const material = new THREE.MeshPhysicalMaterial({
+  roughness: 0,
+  transmission: 1,
+  thickness: 0.5, // Add refraction!
 })
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
+
+// const bgTexture = new THREE.TextureLoader().load("texture.webp");
+// const bgGeometry = new THREE.PlaneGeometry(5, 5);
+// const bgMaterial = new THREE.MeshBasicMaterial({ map: bgTexture });
+// const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
+// bgMesh.position.set(0, 0, -1);
+// scene.add(bgMesh);
 
 // Sizes
 const sizes = {
@@ -44,9 +46,6 @@ window.addEventListener('resize', () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-  // Update composer
-  composer.setSize(sizes.width, sizes.height)
 })
 
 // Camera
@@ -58,60 +57,20 @@ scene.add(camera)
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
 controls.enableZoom = false // Désactiver le zoom
-// controls.enablePan = false // Désactiver le déplacement
+controls.enablePan = false // Désactiver le déplacement
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
-  antialias: true,
-	alpha: true
+  alpha: true // Rendre le fond transparent
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-// Post-processing
-const composer = new EffectComposer(renderer)
-const renderPass = new RenderPass(scene, camera)
-composer.addPass(renderPass)
-
-const verticalBlurPass = new ShaderPass(VerticalBlurShader)
-verticalBlurPass.uniforms.v.value = 20 / sizes.height
-composer.addPass(verticalBlurPass)
-
-const horizontalBlurPass = new ShaderPass(HorizontalBlurShader)
-horizontalBlurPass.uniforms.h.value = 20 / sizes.width
-composer.addPass(horizontalBlurPass)
-
-// Animation variables
-let time = 0
-let targetPosition = new THREE.Vector3()
-let targetRotation = new THREE.Vector3()
-
-// Adjust cube size
-mesh.scale.set(0.5, 0.5, 0.5)
-
 // Animate
 const animate = () => {
-  // Update time
-  time += 0.01
-
-  // Move the cube randomly
-  const range = 2
-  const speed = 0.1
-  targetPosition.x = Math.sin(time * speed) * range
-  targetPosition.y = Math.cos(time * speed) * range
-
-  // Rotate the cube
-  targetRotation.x = time * speed
-  targetRotation.y = time * speed
-
-  // Smoothly move and rotate the cube
-  mesh.position.lerp(targetPosition, 0.05)
-  mesh.rotation.x = targetRotation.x
-  mesh.rotation.y = targetRotation.y
-
-  // Render using the EffectComposer
-  composer.render()
+  // Render
+  renderer.render(scene, camera)
 
   // Call animate again on the next frame
   requestAnimationFrame(animate)
