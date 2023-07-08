@@ -14,8 +14,7 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0xffffff) // Fond blanc
-scene.alpha = true
+scene.background = null
 
 // Object
 const geometry = new THREE.BoxGeometry(1, 1, 1)
