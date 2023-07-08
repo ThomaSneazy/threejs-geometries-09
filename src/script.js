@@ -14,7 +14,6 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
-scene.background = null
 
 // Object
 const geometry = new THREE.BoxGeometry(1, 1, 1)
@@ -63,7 +62,9 @@ controls.enableZoom = false // Désactiver le zoom
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
-  canvas: canvas
+  canvas: canvas,
+  antialias: true,
+	alpha: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
